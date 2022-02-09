@@ -16,9 +16,11 @@ const Map: React.FC<{ selectedUserId: null | number }> = ({
   selectedUserId,
 }) => {
   const mapRef = useRef<any>();
+  const [userPointsDetail, setUserPointsDetail] = useState();
+  const [userHomesMarkers, setUserHomesMarkers] = useState<any[]>();
   const fetchAndAddMap = useCallback(async () => {
     const checkpoints = await apiCalls.getCurrentCheckpoints();
-    const userHomes = await apiCalls.getUserHomes();
+    const resUserHomes = await apiCalls.getUserHomes();
     // TODO: fetch users homes
     // NOTE: in the future, backend could send center along with the checkpoints
     // or frontend can compute the center from all these checkpoints
@@ -44,28 +46,66 @@ const Map: React.FC<{ selectedUserId: null | number }> = ({
         },
       })
     );
-    const userHomeMarkers = userHomes
+    const uhMarkers = resUserHomes
       .filter((home) => home.lat && home.long)
-      .map((home) =>
-        L.mapquest.textMarker([home.lat, home.long], {
-          text: home.username,
-          position: "right",
-          type: "marker",
-          icon: {
-            primaryColor: "#F29025",
-            secondaryColor: "#F29025",
-            size: "sm",
-            symbol: home.id,
-          },
-        })
+      .reduce(
+        (acc, home) => ({
+          ...acc,
+          [home.id]: L.mapquest.textMarker([home.lat, home.long], {
+            text: home.username,
+            position: "right",
+            type: "marker",
+            icon: {
+              primaryColor: "#F29025",
+              secondaryColor: "#F29025",
+              size: "sm",
+              symbol: home.id,
+            },
+          }),
+        }),
+        {}
       );
-    [...cpMarkers, ...userHomeMarkers].forEach((m) => {
+    setUserHomesMarkers(uhMarkers);
+    [...cpMarkers, ...Object.values(uhMarkers)].forEach((m) => {
       m.addTo(mapRef.current);
     });
   }, []);
+
+  const addAllHomeMarkersToMap = useCallback(() => {
+    if (userHomesMarkers) {
+      Object.values(userHomesMarkers).forEach((m) => {
+        m.addTo(mapRef.current);
+      });
+    }
+  }, [userHomesMarkers]);
+
+  const switchSelectedHomeMarkers = useCallback(() => {
+    if (userHomesMarkers) {
+      Object.entries(userHomesMarkers).forEach(([userId, el]) => {
+        if (userId !== `${selectedUserId}`) {
+          el.remove();
+        } else {
+          el.addTo(mapRef.current);
+        }
+      });
+    }
+  }, [selectedUserId, userHomesMarkers]);
   useEffect(() => {
     fetchAndAddMap();
   }, []);
+
+  useEffect(() => {
+    console.log(`selectedUserId ${selectedUserId}`);
+    if (
+      selectedUserId !== null &&
+      selectedUserId !== undefined &&
+      userHomesMarkers
+    ) {
+      switchSelectedHomeMarkers();
+    } else if (selectedUserId === null) {
+      addAllHomeMarkersToMap();
+    }
+  }, [selectedUserId]);
 
   return (
     <Box>

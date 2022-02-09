@@ -50,7 +50,7 @@ interface RanksData {
 declare type Dir = "up" | "down" | "none";
 
 const Leaderboard: React.FC<{
-  setSelectedUserId: (userId: number) => void;
+  setSelectedUserId: (userId: number | null) => void;
   selectedUserId: number | null;
 }> = ({ setSelectedUserId, selectedUserId }) => {
   const [data, setData] = useState<RanksData>();
@@ -78,7 +78,11 @@ const Leaderboard: React.FC<{
               }`}
               onClick={() => {
                 console.log(rh.user.id);
-                setSelectedUserId(rh.user.id);
+                if (rh.user.id === selectedUserId) {
+                  setSelectedUserId(null);
+                } else {
+                  setSelectedUserId(rh.user.id);
+                }
               }}
             >
               <SRankNum>{rh.rank}</SRankNum>
