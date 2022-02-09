@@ -15,7 +15,12 @@ const getCurrentCheckpoints = async () => {
 };
 
 const getUserHomes = async () => {
-  const res = await apiInstance.get("/dashboard/user-homes");
+  const res = await apiInstance.get("/dashboard/user/homes");
+  return res.data;
+};
+
+const getUserPointsDetail = async (userId) => {
+  const res = await apiInstance.get(`/dashboard/user/points-detail/${userId}`);
   return res.data;
 };
 
@@ -23,4 +28,5 @@ export default {
   getLatestRanks,
   getCurrentCheckpoints,
   getUserHomes,
+  getUserPointsDetail,
 };

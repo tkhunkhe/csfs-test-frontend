@@ -25,7 +25,7 @@ const Map = () => {
     mapRef.current = L.mapquest.map(elem, {
       center,
       layers: L.mapquest.tileLayer("map"),
-      zoom: 14,
+      zoom: 13,
     });
     mapRef.current.addControl(L.mapquest.control());
     const cpMarkers = checkpoints.map((cp) =>
