@@ -15,7 +15,8 @@ L.mapquest.key = process.env.REACT_APP_MAPQUEST_KEY;
 const Map = () => {
   const mapRef = useRef<any>();
   const fetchAndAddMap = useCallback(async () => {
-    const data = await apiCalls.getCurrentCheckpoints();
+    const checkpoints = await apiCalls.getCurrentCheckpoints();
+    const userHomes = await apiCalls.getUserHomes();
     // TODO: fetch users homes
     // NOTE: in the future, backend could send center along with the checkpoints
     // or frontend can compute the center from all these checkpoints
@@ -27,7 +28,7 @@ const Map = () => {
       zoom: 14,
     });
     mapRef.current.addControl(L.mapquest.control());
-    const multiple = data.map((cp) =>
+    const cpMarkers = checkpoints.map((cp) =>
       L.mapquest.textMarker([cp.lat, cp.long], {
         text: cp.name,
         // subtext: "Iconic coffeehouse chain",
@@ -41,7 +42,22 @@ const Map = () => {
         },
       })
     );
-    multiple.forEach((m) => {
+    const userHomeMarkers = userHomes
+      .filter((home) => home.lat && home.long)
+      .map((home) =>
+        L.mapquest.textMarker([home.lat, home.long], {
+          text: home.username,
+          position: "right",
+          type: "marker",
+          icon: {
+            primaryColor: "#F29025",
+            secondaryColor: "#F29025",
+            size: "sm",
+            symbol: home.id,
+          },
+        })
+      );
+    [...cpMarkers, ...userHomeMarkers].forEach((m) => {
       m.addTo(mapRef.current);
     });
   }, []);

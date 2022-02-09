@@ -14,7 +14,13 @@ const getCurrentCheckpoints = async () => {
   return res.data;
 };
 
+const getUserHomes = async () => {
+  const res = await apiInstance.get("/dashboard/user-homes");
+  return res.data;
+};
+
 export default {
   getLatestRanks,
-  getCurrentCheckpoints
+  getCurrentCheckpoints,
+  getUserHomes,
 };
