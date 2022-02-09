@@ -1,19 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components/macro";
 import Leaderboard from "../components/Leaderboard";
 import Map from "../components/Map";
-const MainPage = () => (
-  <Page>
-    <Header>
-      <SLogo src={process.env.PUBLIC_URL + "/logo192.png"} />
-      CSFS Board
-    </Header>
-    <Body>
-      <Leaderboard />
-      <Map></Map>
-    </Body>
-  </Page>
-);
+const MainPage = () => {
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  return (
+    <Page>
+      <Header>
+        <SLogo src={process.env.PUBLIC_URL + "/logo192.png"} />
+        CSFS Board
+      </Header>
+      <Body>
+        <Leaderboard
+          setSelectedUserId={setSelectedUserId}
+          selectedUserId={selectedUserId}
+        />
+        <Map selectedUserId={selectedUserId}></Map>
+      </Body>
+    </Page>
+  );
+};
 
 const SLogo = styled.img`
   width: 5rem;

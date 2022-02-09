@@ -12,7 +12,9 @@ declare global {
 var L = window.L;
 L.mapquest.key = process.env.REACT_APP_MAPQUEST_KEY;
 
-const Map = () => {
+const Map: React.FC<{ selectedUserId: null | number }> = ({
+  selectedUserId,
+}) => {
   const mapRef = useRef<any>();
   const fetchAndAddMap = useCallback(async () => {
     const checkpoints = await apiCalls.getCurrentCheckpoints();

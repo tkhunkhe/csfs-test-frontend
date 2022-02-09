@@ -49,24 +49,10 @@ interface RanksData {
 }
 declare type Dir = "up" | "down" | "none";
 
-const DataList: React.FC<{ rankHists?: RankHist[] }> = ({ rankHists }) => (
-  <SListWrapper>
-    {rankHists?.map((rh, i) => {
-      let cn = i === 0 ? "top" : undefined;
-      let dir: Dir = rh.change > 0 ? "up" : rh.change < 0 ? "down" : "none";
-      return (
-        <SList key={`${rh.user.id}-${rh.rank}`} className={cn}>
-          <SRankNum>{rh.rank}</SRankNum>
-          <Direction dir={dir} />
-          <SName>{rh.user.username}</SName>
-          <SPoints>{rh.totalPoints}</SPoints>
-        </SList>
-      );
-    })}
-  </SListWrapper>
-);
-
-const Leaderboard = () => {
+const Leaderboard: React.FC<{
+  setSelectedUserId: (userId: number) => void;
+  selectedUserId: number | null;
+}> = ({ setSelectedUserId, selectedUserId }) => {
   const [data, setData] = useState<RanksData>();
   const [isLoading, setIsLoading] = useState(false);
   const fetchRanks = useCallback(async () => {
@@ -78,6 +64,33 @@ const Leaderboard = () => {
   useEffect(() => {
     fetchRanks();
   }, []);
+  const renderDataList = useCallback(() => {
+    return (
+      <SListWrapper>
+        {data?.rankHists?.map((rh, i) => {
+          let cn = i === 0 ? "top" : undefined;
+          let dir: Dir = rh.change > 0 ? "up" : rh.change < 0 ? "down" : "none";
+          return (
+            <SList
+              key={`${rh.user.id}-${rh.rank}`}
+              className={`${cn} clickable ${
+                selectedUserId === rh.user.id ? "selected" : ""
+              }`}
+              onClick={() => {
+                console.log(rh.user.id);
+                setSelectedUserId(rh.user.id);
+              }}
+            >
+              <SRankNum>{rh.rank}</SRankNum>
+              <Direction dir={dir} />
+              <SName>{rh.user.username}</SName>
+              <SPoints>{rh.totalPoints}</SPoints>
+            </SList>
+          );
+        })}
+      </SListWrapper>
+    );
+  }, [data, selectedUserId]);
   return (
     <Box>
       <STitle>Rankings</STitle>
@@ -86,7 +99,7 @@ const Leaderboard = () => {
           <Loading></Loading>
         </LoadingWrapper>
       ) : (
-        <DataList rankHists={data?.rankHists} />
+        renderDataList()
       )}
     </Box>
   );
@@ -123,6 +136,15 @@ const SList = styled.div.attrs((props) => ({ className: props.className }))`
     & > ${SFontAwesomeIcon} {
       font-size: 2.5rem;
     }
+  }
+  &:hover {
+    --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+      var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+  }
+  &.selected {
+    background: rgba(66, 39, 90, 0.4);
   }
   background: rgba(66, 39, 90, 0.2);
   margin-top: 1rem;
