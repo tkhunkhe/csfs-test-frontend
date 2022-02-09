@@ -1,12 +1,14 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components/macro";
 import Box from "./Box";
+import Loading from "./Loading";
 import {
   faCaretUp,
   faCaretDown,
   faMinus,
 } from "@fortawesome/free-solid-svg-icons";
+import apiCalls from "../services/api-calls";
 
 const iconMap = {
   up: faCaretUp,
@@ -33,29 +35,68 @@ const SFontAwesomeIcon = styled(FontAwesomeIcon).attrs((props) => ({
   color: rgb(69 41 91 / 90%);
   margin-right: 0.5rem;
 `;
-const Leaderboard = () => (
-  <Box>
-    <STitle>Rankings</STitle>
-    <SList className="top">
-      <SRankNum>1</SRankNum>
-      <Direction dir="up" />
-      <SName>test</SName>
-      <SPoints>10</SPoints>
-    </SList>
-    <SList>
-      <SRankNum>2</SRankNum>
-      <Direction dir="down" />
-      <SName>test</SName>
-      <SPoints>5</SPoints>
-    </SList>
-    <SList>
-      <SRankNum>3</SRankNum>
-      <Direction dir="none" />
-      <SName>test</SName>
-      <SPoints>4</SPoints>
-    </SList>
-  </Box>
+
+interface RankHist {
+  user: { id: number; username: string };
+  totalPoints: number;
+  rank: number;
+  change: number;
+}
+interface RanksData {
+  id: number;
+  createdAt: string;
+  rankHists: RankHist[];
+}
+declare type Dir = "up" | "down" | "none";
+
+const DataList: React.FC<{ rankHists?: RankHist[] }> = ({ rankHists }) => (
+  <SListWrapper>
+    {rankHists?.map((rh, i) => {
+      let cn = i === 0 ? "top" : undefined;
+      let dir: Dir = rh.change > 0 ? "up" : rh.change < 0 ? "down" : "none";
+      return (
+        <SList key={`${rh.user.id}-${rh.rank}`} className={cn}>
+          <SRankNum>{rh.rank}</SRankNum>
+          <Direction dir={dir} />
+          <SName>{rh.user.username}</SName>
+          <SPoints>{rh.totalPoints}</SPoints>
+        </SList>
+      );
+    })}
+  </SListWrapper>
 );
+
+const Leaderboard = () => {
+  const [data, setData] = useState<RanksData>();
+  const [isLoading, setIsLoading] = useState(false);
+  const fetchRanks = useCallback(async () => {
+    setIsLoading(true);
+    const resData = await apiCalls.getLatestRanks();
+    setData(resData);
+    setIsLoading(false);
+  }, []);
+  useEffect(() => {
+    fetchRanks();
+  }, []);
+  return (
+    <Box>
+      <STitle>Rankings</STitle>
+      {isLoading ? (
+        <LoadingWrapper>
+          <Loading></Loading>
+        </LoadingWrapper>
+      ) : (
+        <DataList rankHists={data?.rankHists} />
+      )}
+    </Box>
+  );
+};
+const SListWrapper = styled.div``;
+const LoadingWrapper = styled.div`
+  display: grid;
+  place-items: center;
+  flex: 1;
+`;
 const STitle = styled.div`
   font-size: 1.5rem;
   padding: 0 0.5rem;

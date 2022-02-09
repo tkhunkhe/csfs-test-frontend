@@ -43,5 +43,6 @@ const Body = styled.div`
   & > * {
   }
   width: 80%;
+  max-height: 70%;
 `;
 export default MainPage;
