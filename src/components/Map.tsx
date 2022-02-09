@@ -16,12 +16,11 @@ const Map: React.FC<{ selectedUserId: null | number }> = ({
   selectedUserId,
 }) => {
   const mapRef = useRef<any>();
-  const [userPointsDetail, setUserPointsDetail] = useState();
+  const [userPointsDetailMarkers, setUserPointsDetailMarkers] = useState();
   const [userHomesMarkers, setUserHomesMarkers] = useState<any[]>();
   const fetchAndAddMap = useCallback(async () => {
     const checkpoints = await apiCalls.getCurrentCheckpoints();
     const resUserHomes = await apiCalls.getUserHomes();
-    // TODO: fetch users homes
     // NOTE: in the future, backend could send center along with the checkpoints
     // or frontend can compute the center from all these checkpoints
     const center = [45.522, -122.6519491026008];
@@ -90,6 +89,16 @@ const Map: React.FC<{ selectedUserId: null | number }> = ({
       });
     }
   }, [selectedUserId, userHomesMarkers]);
+
+  const fetchUserPointsDetailAndAddToMap = useCallback(async () => {
+    if (selectedUserId) {
+      const resUserPointsDetail = await apiCalls.getUserPointsDetail(
+        selectedUserId
+      );
+      // TODO: add to map
+    }
+  }, [selectedUserId]);
+
   useEffect(() => {
     fetchAndAddMap();
   }, []);
@@ -102,6 +111,7 @@ const Map: React.FC<{ selectedUserId: null | number }> = ({
       userHomesMarkers
     ) {
       switchSelectedHomeMarkers();
+      fetchUserPointsDetailAndAddToMap();
     } else if (selectedUserId === null) {
       addAllHomeMarkersToMap();
     }
