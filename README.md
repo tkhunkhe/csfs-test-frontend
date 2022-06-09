@@ -1,4 +1,4 @@
-# Chainstarts Full-stack Test App: Frontend
+# Full-stack Test App: Frontend
 
 ## Setup
 - add .env with below detail
